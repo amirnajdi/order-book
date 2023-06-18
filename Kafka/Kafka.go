@@ -1,0 +1,55 @@
+package kafka
+
+import (
+	"context"
+	"encoding/json"
+	"strings"
+	"time"
+
+	env "github.com/amirnajdi/order-book/Helper"
+	"github.com/segmentio/kafka-go"
+)
+
+type Order struct {
+	Order_id int
+	Side     string
+	Symbol   string
+	Amount   float64
+	Price    float64
+}
+
+func getBrokersAddress() []string {
+	return strings.Split(env.Getenv("KAFKA_BROKERS_ADDRESS", "localhost:9092"), ",")
+}
+
+func Connection() *kafka.Reader {
+	reader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:         getBrokersAddress(),
+		GroupID:         env.Getenv("KAFKA_GROUP_ID", "order_group"),
+		Topic:           env.Getenv("KAFKA_TOPIC", "orders"),
+		MinBytes:        10e3,            // 10KB
+		MaxBytes:        10e6,            // 10MB
+		MaxWait:         1 * time.Second, // Maximum amount of time to wait for new data to come when fetching batches of messages from kafka.
+		ReadLagInterval: -1,
+	})
+
+	return reader
+}
+
+func ConsumeOrder(reader *kafka.Reader) (*Order, error) {
+	message, err := reader.ReadMessage(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return convertMessageToOrderType(message.Value)
+}
+
+func convertMessageToOrderType(messageValue []byte) (*Order, error) {
+	var order Order
+	if er := json.Unmarshal(messageValue, &order); er != nil {
+		return nil, er
+	}
+
+	return &order, nil
+}
