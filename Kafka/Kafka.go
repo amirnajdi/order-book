@@ -7,10 +7,11 @@ import (
 	"time"
 
 	env "github.com/amirnajdi/order-book/Helper"
+	order "github.com/amirnajdi/order-book/Models"
 	"github.com/segmentio/kafka-go"
 )
 
-type Order struct {
+type OrderRequest struct {
 	Order_id int
 	Side     string
 	Symbol   string
@@ -36,20 +37,28 @@ func Connection() *kafka.Reader {
 	return reader
 }
 
-func ConsumeOrder(reader *kafka.Reader) (*Order, error) {
+func ConsumeOrder(reader *kafka.Reader) (order.Order, error) {
 	message, err := reader.ReadMessage(context.Background())
 	if err != nil {
-		return nil, err
+		return order.Order{}, err
 	}
 
 	return convertMessageToOrderType(message.Value)
 }
 
-func convertMessageToOrderType(messageValue []byte) (*Order, error) {
-	var order Order
-	if er := json.Unmarshal(messageValue, &order); er != nil {
-		return nil, er
+func convertMessageToOrderType(messageValue []byte) (order.Order, error) {
+	var request OrderRequest
+	if er := json.Unmarshal(messageValue, &request); er != nil {
+		return order.Order{}, er
 	}
 
-	return &order, nil
+	order := order.Order{
+		ID: uint(request.Order_id),
+		Side: request.Side,
+		Symbol: request.Symbol,
+		Amount: request.Amount,
+		Price: request.Price,
+	}
+
+	return order, nil
 }
