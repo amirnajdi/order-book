@@ -8,6 +8,8 @@ import (
 	env "github.com/amirnajdi/order-book/Helper"
 	kafka "github.com/amirnajdi/order-book/Kafka"
 	order "github.com/amirnajdi/order-book/Models"
+	router "github.com/amirnajdi/order-book/Router"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -28,20 +30,26 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	kafkaConnection := kafka.Connection()
-	defer kafkaConnection.Close()
+	go func() {
+		kafkaConnection := kafka.Connection()
+		defer kafkaConnection.Close()
 
-	fmt.Println("Listen for kafka data....")
-	for {
-		var order order.Order
-		var err error
-		order, err = kafka.ConsumeOrder(kafkaConnection)
-		if err != nil {
-			fmt.Println(err)
-			continue
+		fmt.Println("Listen for kafka data....")
+		for {
+			var order order.Order
+			var err error
+			order, err = kafka.ConsumeOrder(kafkaConnection)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			order.Insert()
+			fmt.Println("Consome order...")
+			fmt.Println(order)
 		}
-		order.Insert()
-		fmt.Println("Consome order...")
-		fmt.Println(order)
-	}
+	}()
+
+	ginEngine := gin.Default()
+	router.DefineRoutes(ginEngine)
+	ginEngine.Run()
 }
