@@ -7,6 +7,17 @@ import (
 	"gorm.io/gorm"
 )
 
+type list struct { 
+    BUY string
+    SELL string
+}
+
+// Enum for public use
+var SIDE = &list{ 
+    BUY: "BUY",
+    SELL: "SELL",
+}
+
 type Order struct {
 	ID        uint `gorm:"primarykey"`
 	Side      string
@@ -19,8 +30,7 @@ type Order struct {
 
 const table string = "orders"
 
-
-func (order *Order) Insert() (error) {
+func (order *Order) Insert() error {
 	var connection *gorm.DB = database.GetConnectionInstance()
 	connection.Table("orders").Omit("CreatedAt", "Uuid").Create(order)
 	if connection.Error != nil {
@@ -28,4 +38,15 @@ func (order *Order) Insert() (error) {
 	}
 
 	return nil
+}
+
+func GetAllOrders(symbol string, limit int) ([]Order, error) {
+	var connection *gorm.DB = database.GetConnectionInstance()
+	var orders []Order
+	connection.Table(table).Select("id", "price", "amount", "side").Where("symbol = ?", symbol).Order("id desc").Limit(limit).Find(&orders)
+	if connection.Error != nil {
+		return []Order{}, nil
+	}
+
+	return orders, nil
 }
