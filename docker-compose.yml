@@ -24,3 +24,42 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      
+  mariadb:
+    image: "${MARIADB_IMAGE:-mariadb:latest}"
+    container_name: "${MARIADB_CONTAINER_NAME:-mariadb}"
+    hostname: "${MARIADB_HOSTNAME:-mariadb}"
+    restart: always
+    ports:
+      - '${MARIADB_PORT:-3306}:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      TZ: "${TZ}"
+    volumes:
+      - ./Storage/mariadb:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-p${MARIADB_ROOT_PASSWORD}"
+        ]
+      retries: 3
+      timeout: 5s
+
+  phpmyadmin:
+    image: "${PHPMYADMIN_IMAGE:-phpmyadmin:latest}"
+    container_name: "${PHPMYADMIN_CONTAINER_NAME:-phpmyadmin}"
+    hostname: "${PHPMYADMIN_HOSTNAME:-phpmyadmin}"
+    restart: always
+    ports:
+      - '${PHPMYADMIN_PORT:-7070}:80'
+    environment:
+      PMA_HOST: "${MARIADB_HOSTNAME}"
+      PMA_PMADB: phpmyadmin
+      UPLOAD_LIMIT: 300m
+      TZ: "${TZ}"
+    depends_on:
+      - "${MARIADB_CONTAINER_NAME:-mariadb}"
