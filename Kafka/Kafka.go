@@ -7,7 +7,7 @@ import (
 	"time"
 
 	env "github.com/amirnajdi/order-book/Helper"
-	order "github.com/amirnajdi/order-book/Models"
+	orderModel "github.com/amirnajdi/order-book/Models"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -37,22 +37,22 @@ func Connection() *kafka.Reader {
 	return reader
 }
 
-func ConsumeOrder(reader *kafka.Reader) (order.Order, error) {
+func ConsumeOrder(reader *kafka.Reader) (orderModel.Order, error) {
 	message, err := reader.ReadMessage(context.Background())
 	if err != nil {
-		return order.Order{}, err
+		return orderModel.Order{}, err
 	}
 
 	return convertMessageToOrderType(message.Value)
 }
 
-func convertMessageToOrderType(messageValue []byte) (order.Order, error) {
+func convertMessageToOrderType(messageValue []byte) (orderModel.Order, error) {
 	var request OrderRequest
 	if er := json.Unmarshal(messageValue, &request); er != nil {
-		return order.Order{}, er
+		return orderModel.Order{}, er
 	}
 
-	order := order.Order{
+	order := orderModel.Order{
 		ID: uint(request.Order_id),
 		Side: request.Side,
 		Symbol: request.Symbol,

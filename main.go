@@ -7,7 +7,7 @@ import (
 	database "github.com/amirnajdi/order-book/Database"
 	env "github.com/amirnajdi/order-book/Helper"
 	kafka "github.com/amirnajdi/order-book/Kafka"
-	order "github.com/amirnajdi/order-book/Models"
+	orderModel "github.com/amirnajdi/order-book/Models"
 	router "github.com/amirnajdi/order-book/Router"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -36,7 +36,7 @@ func main() {
 
 		fmt.Println("Listen for kafka data....")
 		for {
-			var order order.Order
+			var order orderModel.Order
 			var err error
 			order, err = kafka.ConsumeOrder(kafkaConnection)
 			if err != nil {
