@@ -30,26 +30,28 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	go func() {
-		kafkaConnection := kafka.Connection()
-		defer kafkaConnection.Close()
-
-		fmt.Println("Listen for kafka data....")
-		for {
-			var order orderModel.Order
-			var err error
-			order, err = kafka.ConsumeOrder(kafkaConnection)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			order.Insert()
-			fmt.Println("Consome order...")
-			fmt.Println(order)
-		}
-	}()
-
+	go startConsumeOrder()
+	
 	ginEngine := gin.Default()
 	router.DefineRoutes(ginEngine)
 	ginEngine.Run()
+}
+
+func startConsumeOrder() {
+	kafkaConnection := kafka.Connection()
+	defer kafkaConnection.Close()
+
+	fmt.Println("Listen for kafka data....")
+	for {
+		var order orderModel.Order
+		var err error
+		order, err = kafka.ConsumeOrder(kafkaConnection)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		order.Insert()
+		fmt.Println("Consome order...")
+		fmt.Println(order)
+	}
 }
