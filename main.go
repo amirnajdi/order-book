@@ -14,9 +14,7 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	godotenv.Load(".env")
 
 	_, err := database.Connect(database.DBconnectionConfig{
 		Url:      env.Getenv("DB_URL", "localhost"),
