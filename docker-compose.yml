@@ -1,5 +1,13 @@
 version: '3'
 services:
+  app:
+    build:
+      context: .
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    env_file:
+      - .env
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
     container_name: zookeeper
@@ -11,8 +19,6 @@ services:
     image: confluentinc/cp-kafka:7.3.2
     container_name: broker
     ports:
-    # To learn about configuring Kafka for access across networks see
-    # https://www.confluent.io/blog/kafka-client-cannot-connect-to-broker-on-aws-on-docker-etc/
       - "9092:9092"
     depends_on:
       - zookeeper
@@ -24,7 +30,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      
+
   mariadb:
     image: "${MARIADB_IMAGE:-mariadb:latest}"
     container_name: "${MARIADB_CONTAINER_NAME:-mariadb}"
