@@ -1,4 +1,4 @@
-package OrderModel
+package model
 
 import (
 	"time"

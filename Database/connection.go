@@ -1,4 +1,4 @@
-package DBconnection
+package database
 
 import (
 	"fmt"
