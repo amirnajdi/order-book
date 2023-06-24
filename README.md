@@ -26,7 +26,7 @@ To start the project, follow these steps:
 2. Run `docker-compose up -d` to start the necessary containers.
 3. Access PHPMyAdmin at the default address `localhost:7070`. 
 4. Import the database backup located at `database/order_books.sql.gz` into your MariaDB instance.
-5. Run the command `docker exec -it order-book-app-1 go run Test/insertTestData.go` to insert test data into the system. Replace `order-book-app-1` with the appropriate container name on your system.
+5. Run the command `docker exec -it order-book-app-1 /insert-test-data` to insert test data into the system. Replace `order-book-app-1` with the appropriate container name on your system.
 
 ## Benchmark
 The benchmark was conducted with 1,641,171 records.
