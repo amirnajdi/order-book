@@ -1,5 +1,3 @@
-Sure! Here's an improved version of the README file:
-
 # Order Book
 The Order Book is a simple order tracking system for a cryptocurrency website. It receives orders from Kafka, stores them in a database, and provides an API for users to access the order book for each symbol.
 
